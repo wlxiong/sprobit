@@ -1,6 +1,6 @@
 /// make a subdir for the data
-mkdir BATS96
-cd BATS96
+mkdir ../BATS96
+cd ../BATS96
 /// download BATS96 and unzip it
 shell wget "ftp://ftp.abag.ca.gov/pub/mtc/planning/BATS/BATS96/BATS96G ASCII.zip"
 shell unzip "BATS96G ASCII.zip"

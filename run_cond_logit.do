@@ -1,5 +1,5 @@
 /// import activity data
-use sprobit/BATS96/compACT, clear
+use ../BATS96/compACT, clear
 /// drop fields
 keep sampno persno dayno actcode
 keep if actcode == 14 | actcode == 15 | actcode == 16 | actcode == 21
@@ -11,7 +11,7 @@ reshape wide actv, i(sampno persno dayno) j(actcode)
 mvencode actv*, mv(0)
 reshape long
 /// merge activity data with individual's socio-economic attributes
-merge m:1 sampno persno using sprobit/BATS96/compPER, ///
+merge m:1 sampno persno using ../BATS96/compPER, ///
 	keepusing(relate gender age employ student income)
 /// remove missing observations
 drop if employ == 3 | gender == 3 | student == 3
