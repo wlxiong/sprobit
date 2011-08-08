@@ -97,7 +97,7 @@ global hid sampno
 global y choice
 global X age i.gender i.employ i.student
 
-mdraws, dr(40) neq($NM) prefix(z) random replace
+mdraws, dr(50) neq($NM) prefix(z) replace
 global dr = r(n_draws)
 
 // get initial value from probit
