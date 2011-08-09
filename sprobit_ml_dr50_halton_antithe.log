@@ -1,0 +1,279 @@
+-----------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/xiongyiliang/Workspace/Stata/mvnp/sprobit_ml.log
+  log type:  text
+ opened on:   9 Aug 2011, 16:40:11
+r; t=0.00 16:40:11
+
+. 
+. ******** read data
+. clear
+r; t=0.00 16:40:11
+
+. cd ~/Workspace/Stata/sprobit
+/Users/xiongyiliang/Workspace/Stata/sprobit/
+r; t=0.00 16:40:11
+
+. use merged_actv_pers
+r; t=0.00 16:40:11
+
+. sort sampno persno
+r; t=0.00 16:40:11
+
+. 
+. ******** global varibles
+. qui tab actcode
+r; t=0.00 16:40:11
+
+. global M = r(r)
+r; t=0.00 16:40:11
+
+. qui tab relate
+r; t=0.00 16:40:11
+
+. global N = r(r)
+r; t=0.00 16:40:11
+
+. global NM = $N*$M
+r; t=0.00 16:40:11
+
+. disp $NM
+8
+r; t=0.00 16:40:11
+
+. matrix Wk = (0.0, 0.5 \ 0.5, 0.0)
+r; t=0.00 16:40:11
+
+. matrix W  = Wk # I($M)
+r; t=0.00 16:40:11
+
+. /*
+>         TODO define economic distance matrix
+> */
+. 
+. ******** define household identity
+. global hid sampno
+r; t=0.00 16:40:11
+
+. 
+. ******** deifne dependent and independent variables 
+. global y choice
+r; t=0.00 16:40:11
+
+. global X age i.gender i.employ i.student
+r; t=0.00 16:40:11
+
+. /*
+>         TODO extend to alternative specified parameters
+> */
+. 
+. ******** get initial b0 from probit
+. set rmsg on
+r; t=0.00 16:40:11
+
+. probit $y $X
+
+Iteration 0:   log likelihood = -3660.1725  
+Iteration 1:   log likelihood = -3635.6259  
+Iteration 2:   log likelihood =  -3635.624  
+Iteration 3:   log likelihood =  -3635.624  
+
+Probit regression                                 Number of obs   =       5576
+                                                  LR chi2(4)      =      49.10
+                                                  Prob > chi2     =     0.0000
+Log likelihood =  -3635.624                       Pseudo R2       =     0.0067
+
+------------------------------------------------------------------------------
+      choice |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         age |  -.0062487   .0013436    -4.65   0.000    -.0088821   -.0036152
+    2.gender |   .1225165   .0357139     3.43   0.001     .0525186    .1925144
+    2.employ |   .1647148   .0416896     3.95   0.000     .0830046     .246425
+   2.student |   .1123902   .0750803     1.50   0.134    -.0347644    .2595448
+       _cons |  -.2706088   .0928204    -2.92   0.004    -.4525335   -.0886842
+------------------------------------------------------------------------------
+r; t=16.18 16:40:27
+
+. set rmsg off
+
+. matrix b0 = e(b)
+
+. 
+. ******** estimation procedure: increase `drnum' gradually
+. local drlist 10 20 50
+
+. foreach drnum of local drlist {
+  2.         // create `drnum' Halton draws
+.         set rmsg on
+  3.         mdraws, dr(`drnum') neq($NM) prefix(z) burn(15) antithetics replace
+  4.         set rmsg off
+  5.         return list
+  6.         global dr = r(n_draws)
+  7. 
+.         // call simulation-based ML
+.         ml model d0 sprobit_d0 (choice: $y = $X) /r, tech(nr) ///
+>         title(Spatial Probit Model, $dr Random Draws)
+  8.         ml init b0
+  9.         set rmsg on
+ 10.         ml maximize, difficult
+ 11.         set rmsg off
+ 12.         
+.         // update initial b0
+.         matrix b0 = e(b)
+ 13. }
+Created 10 Halton draws per equation for 8 dimensions. Number of initial draws dropped per dimension = 15 .
+Primes used:
+
+   2   3   5   7  11  13  17  19
+Also created 10 antithetic draws per dimension for 8 dimensions.  Note: there are now 20 draws per equation
+
+scalars:
+            r(n_draws) =  20
+       r(n_dimensions) =  8
+             r(n_burn) =  15
+
+macros:
+        r(antithetics) : "yes"
+             r(prefix) : "z"
+               r(type) : "halton"
+
+matrices:
+             r(primes) :  1 x 8
+
+initial:       log likelihood = -3635.6241
+rescale:       log likelihood = -3635.6241
+rescale eq:    log likelihood = -3635.6241
+Iteration 0:   log likelihood = -3635.6241  
+Iteration 1:   log likelihood = -3232.4314  (not concave)
+Iteration 2:   log likelihood =  -3231.654  (not concave)
+Iteration 3:   log likelihood = -3231.6051  (not concave)
+Iteration 4:   log likelihood = -3230.9972  (not concave)
+Iteration 5:   log likelihood =  -3230.628  (not concave)
+Iteration 6:   log likelihood = -3230.1741  (not concave)
+Iteration 7:   log likelihood = -3230.1037  (not concave)
+Iteration 8:   log likelihood = -3230.0473  (not concave)
+Iteration 9:   log likelihood = -3230.0297  (not concave)
+Iteration 10:  log likelihood = -3230.0233  (not concave)
+Iteration 11:  log likelihood = -3229.9355  
+Iteration 12:  log likelihood = -3229.9121  (not concave)
+Iteration 13:  log likelihood = -3229.8477  
+Iteration 14:  log likelihood = -3229.8326  (not concave)
+Iteration 15:  log likelihood =  -3229.804  (not concave)
+Iteration 16:  log likelihood = -3229.7911  (not concave)
+Iteration 17:  log likelihood = -3229.7855  (not concave)
+Iteration 18:  log likelihood =  -3229.784  
+Iteration 19:  log likelihood = -3229.7829  
+Iteration 20:  log likelihood = -3229.7828  
+
+Spatial Probit Model, 20 Random Draws             Number of obs   =       5576
+                                                  Wald chi2(4)    =      79.51
+Log likelihood = -3229.7828                       Prob > chi2     =     0.0000
+
+------------------------------------------------------------------------------
+      choice |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+choice       |
+         age |  -.0057436   .0010652    -5.39   0.000    -.0078314   -.0036558
+    2.gender |   .2879878   .0506249     5.69   0.000     .1887647    .3872108
+    2.employ |   .1698048   .0420293     4.04   0.000     .0874289    .2521808
+   2.student |   .1097263   .1815258     0.60   0.546    -.2460578    .4655104
+       _cons |  -.2924405   .1865575    -1.57   0.117    -.6580865    .0732056
+-------------+----------------------------------------------------------------
+r            |
+       _cons |   .9089942   .0309073    29.41   0.000     .8484171    .9695714
+------------------------------------------------------------------------------
+Created 20 Halton draws per equation for 8 dimensions. Number of initial draws dropped per dimension = 15 .
+Primes used:
+
+   2   3   5   7  11  13  17  19
+Also created 20 antithetic draws per dimension for 8 dimensions.  Note: there are now 40 draws per equation
+
+scalars:
+            r(n_draws) =  40
+       r(n_dimensions) =  8
+             r(n_burn) =  15
+
+macros:
+        r(antithetics) : "yes"
+             r(prefix) : "z"
+               r(type) : "halton"
+
+matrices:
+             r(primes) :  1 x 8
+
+initial:       log likelihood = -3226.1282
+rescale:       log likelihood = -3226.1282
+rescale eq:    log likelihood = -3226.1282
+Iteration 0:   log likelihood = -3226.1282  
+Iteration 1:   log likelihood = -3226.0483  
+Iteration 2:   log likelihood = -3226.0483  
+
+Spatial Probit Model, 40 Random Draws             Number of obs   =       5576
+                                                  Wald chi2(4)    =      71.00
+Log likelihood = -3226.0483                       Prob > chi2     =     0.0000
+
+------------------------------------------------------------------------------
+      choice |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+choice       |
+         age |  -.0057547   .0012777    -4.50   0.000     -.008259   -.0032504
+    2.gender |    .289709   .0481212     6.02   0.000     .1953931    .3840249
+    2.employ |   .1703858   .0440035     3.87   0.000     .0841405     .256631
+   2.student |   .1059449   .0651747     1.63   0.104    -.0217951     .233685
+       _cons |  -.2895083   .0791384    -3.66   0.000    -.4446168   -.1343998
+-------------+----------------------------------------------------------------
+r            |
+       _cons |   .9213921   .0314359    29.31   0.000      .859779    .9830053
+------------------------------------------------------------------------------
+Created 50 Halton draws per equation for 8 dimensions. Number of initial draws dropped per dimension = 15 .
+Primes used:
+
+   2   3   5   7  11  13  17  19
+Also created 50 antithetic draws per dimension for 8 dimensions.  Note: there are now 100 draws per equation
+
+scalars:
+            r(n_draws) =  100
+       r(n_dimensions) =  8
+             r(n_burn) =  15
+
+macros:
+        r(antithetics) : "yes"
+             r(prefix) : "z"
+               r(type) : "halton"
+
+matrices:
+             r(primes) :  1 x 8
+
+initial:       log likelihood = -3227.2705
+rescale:       log likelihood = -3227.2705
+rescale eq:    log likelihood = -3227.2705
+Iteration 0:   log likelihood = -3227.2705  
+Iteration 1:   log likelihood = -3227.2537  
+Iteration 2:   log likelihood = -3227.2537  
+
+Spatial Probit Model, 100 Random Draws            Number of obs   =       5576
+                                                  Wald chi2(4)    =      87.08
+Log likelihood = -3227.2537                       Prob > chi2     =     0.0000
+
+------------------------------------------------------------------------------
+      choice |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+choice       |
+         age |  -.0057878   .0010761    -5.38   0.000     -.007897   -.0036787
+    2.gender |    .288037   .0454343     6.34   0.000     .1989874    .3770866
+    2.employ |   .1710052   .0416794     4.10   0.000     .0893152    .2526953
+   2.student |   .1075448   .0649354     1.66   0.098    -.0197263     .234816
+       _cons |  -.2891457   .0685346    -4.22   0.000     -.423471   -.1548204
+-------------+----------------------------------------------------------------
+r            |
+       _cons |   .9156664   .0310905    29.45   0.000     .8547301    .9766027
+------------------------------------------------------------------------------
+
+. 
+. // turn off log
+. log off
+      name:  <unnamed>
+       log:  /Users/xiongyiliang/Workspace/Stata/mvnp/sprobit_ml.log
+  log type:  text
+ paused on:   9 Aug 2011, 17:46:32
+-----------------------------------------------------------------------------------------------------------------
