@@ -1,14 +1,12 @@
-// spatial probit model
+******** spatial probit model of intra-household interactions
 version 11
 cap log close
 set more off
 set matsize 10000
 
-// likelihood function
-// deravative 0 form
+******** likelihood function: derivative 0 form
 capture program drop sprobit_d0
 program define sprobit_d0
-	/// ml general form form 0
 	version 11
 	args todo b lnf
 	
@@ -58,13 +56,13 @@ end
 // turn on log
 log using sprobit_ml.log, replace
 
-// read data
+******** read data
 clear
 cd ~/Workspace/Stata/sprobit
 use merged_actv_pers
 sort sampno persno
 
-// global varibles
+******** global varibles
 qui tab actcode
 global M = r(r)
 qui tab relate
@@ -76,24 +74,31 @@ matrix W  = Wk # I($M)
 /*
 	TODO define economic distance matrix
 */
+
+******** define household identity
 global hid sampno
+
+******** deifne dependent and independent variables 
 global y choice
 global X age i.gender i.employ i.student
 /*
 	TODO extend to alternative specified parameters
 */
-set rmsg on
-mdraws, dr(10) neq($NM) prefix(z) burn(10) antithetics
-set rmsg off
-global dr = r(n_draws)
 
-// get initial value from probit
+******** get initial b0 from probit
 set rmsg on
 probit $y $X
 set rmsg off
 matrix b0 = e(b)
 
-// call simulation-based ML
+******** creat 10 Halton draws
+set rmsg on
+mdraws, dr(10) neq($NM) prefix(z) burn(10) antithetics
+set rmsg off
+global dr = r(n_draws)
+
+
+******** call simulation-based ML
 ml model d0 sprobit_d0 (choice: $y = $X) /r, tech(nr) ///
 title(Spatial Probit Model, $dr Random Draws)
 ml init b0
