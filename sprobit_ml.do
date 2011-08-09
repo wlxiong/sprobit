@@ -72,6 +72,12 @@ disp $NM
 matrix Wk = (0.0, 0.5 \ 0.5, 0.0)
 matrix W  = Wk # I($M)
 /*
+	NOTE The spatial weight matrix W is highly sparse. 
+	NOTE The resulting weights are meaningful, finite and non-negative.
+	NOTE It is also important to maintain the weights matrix as exogenous.
+	NOTE When a scaling factor, such as a spatial autoregressive coefficient, 
+		is included together with parameterized weights, both sets of parameters 
+		are not necessarily identified.
 	TODO define economic distance matrix
 */
 
@@ -85,6 +91,9 @@ global X age i.gender i.employ
 	CHANGED remove i.student from independent variables
 	TODO and also consider significance of _cons after removal of i.student
 	TODO extend to alternative specified parameters
+	TODO identification of multivariate probit model (not MNP)
+	TODO The full spatial model is premultiplied by the variance-normalizing 
+		transformation diagonal matrix.
 */
 
 ******** get initial b0 from probit
