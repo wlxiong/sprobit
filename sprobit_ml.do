@@ -82,6 +82,8 @@ global hid sampno
 global y choice
 global X age i.gender i.employ i.student
 /*
+	TODO remove i.student from independent variables
+	TODO and also consider significance of _cons
 	TODO extend to alternative specified parameters
 */
 
@@ -91,24 +93,27 @@ probit $y $X
 set rmsg off
 matrix b0 = e(b)
 
-******** creat 10 Halton draws
-set rmsg on
-mdraws, dr(10) neq($NM) prefix(z) burn(10) antithetics
-set rmsg off
-global dr = r(n_draws)
+******** estimation procedure: increase `drnum' gradually
+local drlist 10 20 50
+foreach drnum of local drlist {
+	// create `drnum' Halton draws
+	set rmsg on
+	mdraws, dr(`drnum') neq($NM) prefix(z) burn(15) antithetics replace
+	set rmsg off
+	return list
+	global dr = r(n_draws)
 
+	// call simulation-based ML
+	ml model d0 sprobit_d0 (choice: $y = $X) /r, tech(nr) ///
+	title(Spatial Probit Model, $dr Random Draws)
+	ml init b0
+	set rmsg on
+	ml maximize, difficult
+	set rmsg off
 
-******** call simulation-based ML
-ml model d0 sprobit_d0 (choice: $y = $X) /r, tech(nr) ///
-title(Spatial Probit Model, $dr Random Draws)
-ml init b0
-set rmsg on
-ml maximize, difficult
-set rmsg off
+	// update initial b0
+	matrix b0 = e(b)
+}
 
 // turn off log
 log off
-
-/*
-	TODO add Run (Terminal) for Stata bundle
-*/
