@@ -5,13 +5,6 @@ set more off
 set matsize 10000
 
 // likelihood function
-
-// linear form
-capture program drop sprobit_lf
-program define sprobit_lf
-
-end
-
 // deravative 0 form
 capture program drop sprobit_d0
 program define sprobit_d0
@@ -89,19 +82,24 @@ global X age i.gender i.employ i.student
 /*
 	TODO extend to alternative specified parameters
 */
-
+set rmsg on
 mdraws, dr(10) neq($NM) prefix(z) burn(10) antithetics
+set rmsg off
 global dr = r(n_draws)
 
 // get initial value from probit
+set rmsg on
 probit $y $X
+set rmsg off
 matrix b0 = e(b)
 
 // call simulation-based ML
 ml model d0 sprobit_d0 (choice: $y = $X) /r, tech(nr) ///
 title(Spatial Probit Model, $dr Random Draws)
 ml init b0
+set rmsg on
 ml maximize, difficult
+set rmsg off
 
 // turn off log
 log off
