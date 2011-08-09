@@ -32,33 +32,34 @@ program define sprobit_d0
 	/*
 		TODO consider unrestricted covariance matrix
 	*/
-	
+	// declare xb*
 	forvalues i = 1/$NM {
 		tempvar  xb`i'
-		tempname xbvec`i'
 	}
+   	// generate k* and xb*
+	capture drop k*
 	quietly{
 		forvalues i = 1/$NM {
 			by $hid: gen double k`i'  = (2*$ML_y1[`i']) - 1
 			by $hid: gen double `xb`i'' = `theta'[`i']
-			mkmat `xb`i'', matrix(`xbvec`i'')
 		}
-		// mkmat $xbs, matrix(XB)
+		// generate xb array
+		local xbs " "
+		forvalues i = 1/$NM {
+			local xbs  "`xbs'  `xb`i''"
+		}
+		// multiply XB with (I-rho*W)
 		tempname XB AXB
-		matrix XB = `xbvec1'
-		forvalues i = 2/$NM {
-			matrix XB = XB, `xbvec`i''
-		}
+		mkmat `xbs', matrix(XB)
 		matrix AXB = XB*(`invA')'
+		// convert matrix into varlist
+		capture drop axb*
 		svmat AXB, name(axb)
 		tempvar last fi
 		by $hid: gen byte `last' = (_n==$NM)
-		su axb* k*
 		egen `fi'   = mvnp(axb*), chol(`L') dr($dr) prefix(z) signs(k*)
 		mlsum `lnf' = ln(`fi') if `last'
-		// clear variables
-		drop axb* k*
-	}	
+	}
 end
 
 // turn on log
@@ -66,6 +67,7 @@ log using sprobit_ml.log, replace
 
 // read data
 clear
+cd ~/Workspace/Stata/sprobit
 use merged_actv_pers
 sort sampno persno
 
@@ -88,23 +90,18 @@ global X age i.gender i.employ i.student
 	TODO extend to alternative specified parameters
 */
 
-mdraws, dr(50) neq($NM) prefix(z) replace
+mdraws, dr(10) neq($NM) prefix(z) burn(10) antithetics
 global dr = r(n_draws)
 
 // get initial value from probit
 probit $y $X
 matrix b0 = e(b)
 
-// generate xb array
-// global xbs " "
-// forvalues i = 1/$NM {
-// 	global xbs "$xbs \`xb`i''"
-// }
-
 // call simulation-based ML
-ml model d0 sprobit_d0 (choice: $y = $X) /r
+ml model d0 sprobit_d0 (choice: $y = $X) /r, tech(nr) ///
+title(Spatial Probit Model, $dr Random Draws)
 ml init b0
-ml maximize, trace
+ml maximize, difficult
 
 // turn off log
 log off
