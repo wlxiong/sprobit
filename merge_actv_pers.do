@@ -5,6 +5,7 @@ merge m:1 sampno persno using filtered_pers, ///
 	keepusing(relate gender age employ student numpers has_spouse)
 tab _merge
 keep if _merge == 3
+drop _merge
 sort sampno
 // if hasing missing values, drop the household
 egen has_miss = rowmiss(_all)
