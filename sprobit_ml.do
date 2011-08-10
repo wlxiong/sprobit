@@ -53,14 +53,13 @@ program define sprobit_d0
 	}
 end
 
-// turn on log
-log using sprobit_ml.log, replace
-
 ******** read data
 clear
 cd ~/Workspace/Stata/sprobit
 use merged_actv_pers
-sort sampno persno
+// turn on log
+log using sprobit_ml.log, replace
+
 
 ******** global varibles
 qui tab actcode
@@ -83,6 +82,7 @@ matrix W  = Wk # I($M)
 
 ******** define household identity
 global hid sampno
+sort sampno persno
 
 ******** deifne dependent and independent variables 
 global y choice
