@@ -11,8 +11,8 @@ program define sprobit_d0
 
 	tempname A invA covU L
 	matrix `A'    = I($NM) - `rho'*W
-	matrix `invA' = inv(`A')
-	matrix `covU' = inv((`A')'*`A')
+	matrix `invA' = invsym(`A')
+	matrix `covU' = invsym((`A')'*`A')
 	matrix `L'    = cholesky(`covU')
 	/*
 		TODO consider unrestricted covariance matrix
