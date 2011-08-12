@@ -14,7 +14,7 @@ clear
 cd ~/Workspace/Stata/sprobit
 log using simulate_data.log, replace
 
-******** prepare the simulation data
+******** set the simulation parameters
 
 // set number of observations in the simulation
 local gobs 200
@@ -42,27 +42,45 @@ matrix _covU = invsym(_invA'*_invA)
 gen sampno = int((_n-1)/$NM)+1
 sort sampno
 
-// generate correlated random errors
+******** generate correlated random errors
 local randutils " "
 forvalues j = 1/$NM {
 	local randutils "`randutils' u_`j'"
 }
+// draw from multivariate normal distribution
 drawnorm `randutils', cov(_covU)
-forvalues j = 1/$NM {
-	by sampno: replace  u_`j' = u_`j'[1]
-}
-
-// generate observed attributes
-gen x1 = 5*runiform() - 3
-gen x2 = 3*runiform() - 2
-
-// generate latent utility
-gen utils = _b1*x1 + _b2*x2
+matrix list _covU
+corr u_*, covariance
+// reformat random errors
+gen uj = .
 forvalues j = 1/$NM{
-	by sampno: replace utils = utils + u_`j'
+	by sampno: replace uj = u_`j'[1] if _n == `j'
 }
 
-// generate observed choices
+******** generate latent utility
+gen x1 = 5*runiform() - 2
+gen x2 = 3*runiform() - 2
+gen _xb = _b1*x1 + _b2*x2
+forvalues i = 1/$NM {
+	by sampno: gen _xb`i' = _xb[`i']
+}
+// generate xb array
+local _xbs " "
+forvalues i = 1/$NM {
+	local _xbs  "`_xbs'  _xb`i'"
+}
+// multiply _XB with (I-rho*W)
+mkmat `_xbs', matrix(_XB)
+matrix _AXB = _XB*(_invA)'
+capture drop _axb*
+svmat _AXB, name(_axb)
+// add random errors
+gen utils = .
+forvalues j = 1/$NM{
+	by sampno: replace utils = _axb`j' + uj if _n == `j'
+}
+
+******** generate observed choices
 gen choice = utils > 0
 tab choice
 

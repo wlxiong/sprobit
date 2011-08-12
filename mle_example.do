@@ -26,7 +26,7 @@ set rmsg off
 matrix b0 = e(b)
 
 ******** estimation procedure: increase `drnum' gradually
-local drlist 10 20 50 100
+local drlist 10 20 50
 foreach drnum of local drlist {
 	// create `drnum' Halton draws
 	set rmsg on
