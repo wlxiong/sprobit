@@ -42,7 +42,7 @@ sort sampno persno
 
 ******** deifne dependent and independent variables 
 global y choice
-global X age i.gender i.employ
+global X age i.gender i.employ i.license
 /*
 	CHANGED remove i.student from independent variables
 	CHANGED and also consider significance of _cons after removal of i.student
