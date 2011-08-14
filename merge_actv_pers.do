@@ -2,7 +2,7 @@
 use filtered_actv, clear
 // merge activity data with individual's socio-economic attributes
 merge m:1 sampno persno using filtered_pers, ///
-	keepusing(relate gender age employ student numpers has_spouse)
+	keepusing(relate gender age employ student license numpers has_spouse)
 tab _merge
 keep if _merge == 3
 drop _merge

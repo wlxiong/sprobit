@@ -5,10 +5,12 @@ sort sampno
 // replace missing variables
 // replace age = . if age == 999
 // replace income = . if income == 98 | income == 99
+
 // remove missing observations
 drop if age == 999
 drop if income == 98 | income == 99
 drop if employ == 3 | gender == 3 | student == 3
+drop if license == 3
 
 // only consider the household heads
 keep if relate < 2

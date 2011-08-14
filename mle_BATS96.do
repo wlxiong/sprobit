@@ -46,7 +46,7 @@ global X age i.gender i.employ
 /*
 	CHANGED remove i.student from independent variables
 	CHANGED and also consider significance of _cons after removal of i.student
-	TODO add drive license as independent variables (or in weight matrix?)
+	CHANGED add drive license as independent variables (or in weight matrix?)
 	TODO Heteroscedastic covariance matrix: 
 			The full spatial model is premultiplied by the variance-normalizing 
 			transformation diagonal matrix.
