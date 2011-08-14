@@ -2,7 +2,7 @@
 capture program drop sprobit_d0
 program define sprobit_d0
 	version 11
-	args todo b lnf
+	args func b lnf
 	
 	tempvar theta
 	tempname rho
