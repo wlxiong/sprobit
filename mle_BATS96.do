@@ -1,9 +1,4 @@
 ******** spatial probit model of intra-household interactions
-/*
-	TODO extend to alternative specified parameters
-	TODO identification of alternative specified parameters and 
-		covariance matrix of multivariate probit (not MNP)
-*/
 version 11
 cap log close
 set more off
@@ -41,9 +36,21 @@ matrix W  = Wk # I($M)
 global hid sampno
 sort sampno persno
 
+/*
+	TODO extend to alternative specified parameters
+	TODO identification of alternative specified parameters and 
+		 covariance matrix of multivariate probit (not MNP)
+*/
+// generate alternative specific constants
+local ascons " "
+foreach actv of numlist 14 15 16 21 {
+	gen cons_`actv' = cond(`actv'==actcode, 1, 0)
+	local ascons "`ascons' _cons_`actv'"
+}
+
 ******** deifne dependent and independent variables 
 global y choice
-global X age i.gender i.employ
+global X age i.gender i.employ `ascons'
 /*
 	CHANGED remove i.student from independent variables
 	CHANGED and also consider significance of _cons after removal of i.student
