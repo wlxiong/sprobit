@@ -42,11 +42,12 @@ sort sampno persno
 
 ******** deifne dependent and independent variables 
 global y choice
-global X age i.gender i.employ i.license
+global X age i.gender i.employ
 /*
 	CHANGED remove i.student from independent variables
 	CHANGED and also consider significance of _cons after removal of i.student
 	CHANGED add drive license as independent variables (or in weight matrix?)
+	CHANGED remove drive license (not siginificant)
 	TODO Heteroscedastic covariance matrix: 
 			The full spatial model is premultiplied by the variance-normalizing 
 			transformation diagonal matrix.
