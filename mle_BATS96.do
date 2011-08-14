@@ -1,4 +1,9 @@
 ******** spatial probit model of intra-household interactions
+/*
+	TODO extend to alternative specified parameters
+	TODO identification of alternative specified parameters and 
+		covariance matrix of multivariate probit (not MNP)
+*/
 version 11
 cap log close
 set more off
@@ -21,13 +26,14 @@ disp $NM
 matrix Wk = (0.0, 0.5 \ 0.5, 0.0)
 matrix W  = Wk # I($M)
 /*
+	TODO Define economic distance matrix: 
+		 Differences of total working hours between husband and wife
 	NOTE The spatial weight matrix W is highly sparse. 
 	NOTE The resulting weights are meaningful, finite and non-negative.
 	NOTE It is also important to maintain the weights matrix as exogenous.
 	NOTE When a scaling factor, such as a spatial autoregressive coefficient, 
 		is included together with parameterized weights, both sets of parameters 
 		are not necessarily identified.
-	TODO define economic distance matrix
 */
 
 ******** define household identity
@@ -40,11 +46,12 @@ global X age i.gender i.employ
 /*
 	CHANGED remove i.student from independent variables
 	CHANGED and also consider significance of _cons after removal of i.student
-	TODO extend to alternative specified parameters
-	TODO identification of covariance matrix of multivariate probit (not MNP)
+	TODO add drive license as independent variables (or in weight matrix?)
 	TODO Heteroscedastic covariance matrix: 
-		The full spatial model is premultiplied by the variance-normalizing 
-		transformation diagonal matrix.
+			The full spatial model is premultiplied by the variance-normalizing 
+			transformation diagonal matrix.
+	TODO number of cars within the household
+	TODO number of children under 6-year old 6 to 12-year
 */
 
 ******** get initial b0 from probit
