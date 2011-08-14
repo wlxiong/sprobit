@@ -9,11 +9,18 @@ program define sprobit_d0
 	mleval `theta' = `b', eq(1)
 	mleval `rho'   = `b', eq(2) scalar
 
-	tempname A invA covU L
+	tempname A invA covU L sqrtU Z corrU
 	matrix `A'    = I($NM) - `rho'*W
 	matrix `invA' = invsym(`A')
 	matrix `covU' = invsym((`A')'*`A')
-	matrix `L'    = cholesky(`covU')
+	// square root of the diag of the covariance matrix
+	matrix `sqrtU' = cholesky(diag(vecdiag(`covU')))
+	// variance-normalizing diagonal matrix
+	matrix `Z'     = invsym(`sqrtU')
+	// normalized A^-1 and the correlation matrix
+	matrix `invA'  = `Z'*`invA'
+	matrix `corrU' = `Z'*`covU'*`Z'
+	matrix `L'     = cholesky(`corrU')
 	/*
 		TODO consider unrestricted covariance matrix
 	*/

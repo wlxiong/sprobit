@@ -28,6 +28,7 @@ matrix W  = Wk # I($M)
 /*
 	TODO Define economic distance matrix: 
 		 Differences of total working hours between husband and wife
+		 Or the non-overlapping working hours
 	NOTE The spatial weight matrix W is highly sparse. 
 	NOTE The resulting weights are meaningful, finite and non-negative.
 	NOTE It is also important to maintain the weights matrix as exogenous.
@@ -48,7 +49,7 @@ global X age i.gender i.employ
 	CHANGED and also consider significance of _cons after removal of i.student
 	CHANGED add drive license as independent variables (or in weight matrix?)
 	CHANGED remove drive license (not siginificant)
-	TODO Heteroscedastic covariance matrix: 
+	CHANGED Heteroscedastic covariance matrix: 
 			The full spatial model is premultiplied by the variance-normalizing 
 			transformation diagonal matrix.
 	TODO number of cars within the household
@@ -62,7 +63,7 @@ set rmsg off
 matrix b0 = e(b)
 
 ******** estimation procedure: increase `drnum' gradually
-local drlist 10 20 50 100
+local drlist 10 20 50
 foreach drnum of local drlist {
 	// create `drnum' Halton draws
 	set rmsg on
