@@ -5,14 +5,16 @@ program define sprobit_d0
 	args func b lnf
 	
 	tempvar theta
-	tempname rho
+	tempname rho lnsig sigma
 	mleval `theta' = `b', eq(1)
 	mleval `rho'   = `b', eq(2) scalar
+	mleval `lnsig' = `b', eq(3) scalar
+	scalar `sigma' = exp(`lnsig')
 
 	tempname A invA covU L sqrtU Z corrU
 	matrix `A'    = I($NM) - `rho'*W
 	matrix `invA' = invsym(`A')
-	matrix `covU' = invsym((`A')'*`A')
+	matrix `covU' = invsym((`A')'*`A')*`sigma'*`sigma'
 	// square root of the diag of the covariance matrix
 	matrix `sqrtU' = cholesky(diag(vecdiag(`covU')))
 	// variance-normalizing diagonal matrix
@@ -22,7 +24,7 @@ program define sprobit_d0
 	matrix `corrU' = `Z'*`covU'*`Z'
 	matrix `L'     = cholesky(`corrU')
 	/*
-		TODO consider unrestricted covariance matrix
+		CHANGED consider i.i.d. normal distributed errors
 	*/
 	// declare xb*
 	forvalues i = 1/$NM {

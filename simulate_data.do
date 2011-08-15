@@ -28,10 +28,10 @@ scalar _b1 = 1 // two independent variables
 scalar _b2 = 2
 
 // weight matrix
-matrix Wk = ( 0, .5, .5, .5 \ .5,  0,  0,  0 \ .5,  0,  0,  0 \ .5,  0,  0,  0)
-// matrix Wk = ( 0, .5, .5, .5 \ .5,  0,  0,  0 \ .5,  0,  0,  0 \ .5,  0,  0,  0)
-// matrix Wk = ( 0, .5, .5, .5 \ .5,  0,  0,  0 \ .5,  0,  0,  0 \ .5,  0,  0,  0)
-matrix W  = Wk # I($M)
+matrix Wk1 = ( 0, .5, .5, .5 \ .5,  0,  0,  0 \ .5,  0,  0,  0 \ .5,  0,  0,  0)
+matrix Wk2 = ( 0, .5,  0, .5 \ .5,  0, .5,  0 \  0, .5,  0, .5 \ .5,  0, .5,  0)
+matrix Wk3 = ( 0, .5, .5, .5 \ .5,  0, .5, .5 \ .5, .5,  0, .5 \ .5, .5, .5,  0)
+matrix W = Wk1 # I($M)
 
 // covariance matrix
 matrix _A    = I($NM) - _rho*W
