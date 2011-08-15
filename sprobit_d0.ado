@@ -42,11 +42,11 @@ program define sprobit_d0
 		}
 		// multiply XB with (I-rho*W)
 		tempname XB AXB
-		mkmat `xbs', matrix(XB)
-		matrix AXB = XB*(`invA')'
+		mkmat `xbs', matrix(`XB')
+		matrix `AXB' = `XB'*(`invA')'
 		// convert matrix into varlist
 		capture drop axb*
-		svmat AXB, name(axb)
+		svmat `AXB', name(axb)
 		tempvar last fi
 		by $hid: gen byte `last' = (_n==$NM)
 		egen `fi'   = mvnp(axb*), chol(`L') dr($dr) prefix(z) signs(k*)

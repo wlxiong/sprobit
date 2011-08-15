@@ -2,7 +2,7 @@
 version 11
 cap log close
 set more off
-set matsize 10000
+set matsize 6000
 
 ******** read data
 clear
@@ -44,7 +44,7 @@ sort sampno persno
 // generate alternative specific constants
 local ascons " "
 foreach actv of numlist 14 15 16 21 {
-	gen cons_`actv' = cond(`actv'==actcode, 1, 0)
+	gen _cons_`actv' = cond(`actv'==actcode, 1, 0)
 	local ascons "`ascons' _cons_`actv'"
 }
 
@@ -70,7 +70,7 @@ set rmsg off
 matrix b0 = e(b)
 
 ******** estimation procedure: increase `drnum' gradually
-local drlist 10 20 50
+local drlist 2 10 20 50
 foreach drnum of local drlist {
 	// create `drnum' Halton draws
 	set rmsg on
