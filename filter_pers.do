@@ -2,6 +2,12 @@
 use ../BATS96/compPER, clear
 sort sampno
 
+// merge work activity
+merge 1:1 sampno persno using filtered_work
+tab _merge
+keep if _merge == 3
+drop _merge
+
 ******** filter household heads
 // replace missing variables
 // replace age = . if age == 999
@@ -22,13 +28,7 @@ by sampno: replace has_spouse = has_spouse[_N]
 keep if has_spouse == 1
 
 ******** calculate economic distance
-// merge work activity
-merge 1:1 sampno persno using filtered_work
-tab _merge
-keep if _merge == 3
-drop _merge
-
-// global variables
+// number of persons in each household
 qui tab relate
 global N = r(r)
 
