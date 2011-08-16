@@ -2,6 +2,7 @@
 use ../BATS96/compPER, clear
 sort sampno
 
+******** filter household heads
 // replace missing variables
 // replace age = . if age == 999
 // replace income = . if income == 98 | income == 99
@@ -19,6 +20,25 @@ keep if numpers == 2
 by sampno: gen has_spouse = sum(relate==1)
 by sampno: replace has_spouse = has_spouse[_N]
 keep if has_spouse == 1
+
+******** calculate economic distance
+// merge work activity
+merge 1:1 sampno persno using filtered_work
+tab _merge
+keep if _merge == 3
+drop _merge
+
+// global variables
+qui tab relate
+global N = r(r)
+
+// generate household working time span
+sort sampno persno
+by sampno: gen persid = _n
+forvalues j = 1/$N {
+	by sampno: gen dist_`j' = max(ending[_n], ending[`j']) - ///
+							  min(begin[_n], begin[`j'])
+}
 
 // save refined data
 save filtered_pers, replace
