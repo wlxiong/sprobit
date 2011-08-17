@@ -28,10 +28,11 @@ scalar _b1 = 1 // two independent variables
 scalar _b2 = 2
 
 // weight matrix
+global Wk_name Wk2
 matrix Wk1 = ( 0, .5, .5, .5 \ .5,  0,  0,  0 \ .5,  0,  0,  0 \ .5,  0,  0,  0)
 matrix Wk2 = ( 0, .5,  0, .5 \ .5,  0, .5,  0 \  0, .5,  0, .5 \ .5,  0, .5,  0)
 matrix Wk3 = ( 0, .5, .5, .5 \ .5,  0, .5, .5 \ .5, .5,  0, .5 \ .5, .5, .5,  0)
-matrix W = Wk1 # I($M)
+matrix W = $Wk_name # I($M)
 
 // covariance matrix
 matrix _A    = I($NM) - _rho*W
@@ -85,7 +86,7 @@ gen choice = utils > 0
 tab choice
 
 // save simulated data
-save simulated_data, replace
+save simulated_data_$Wk_name, replace
 
 // turn off log
 log off

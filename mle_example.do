@@ -7,9 +7,9 @@ set matsize 2400
 ******** read data
 clear
 cd ~/Workspace/Stata/sprobit
-use simulated_data
+use simulated_data_$Wk_name
 // turn on log
-log using mle_example.log, replace
+log using mle_example_$Wk_name.log, replace
 
 ******** define household identity
 global hid sampno
@@ -26,7 +26,7 @@ set rmsg off
 matrix b0 = e(b)
 
 ******** estimation procedure: increase `drnum' gradually
-local drlist 10 20 50
+local drlist 2 10 20 50
 foreach drnum of local drlist {
 	// create `drnum' Halton draws
 	set rmsg on
@@ -36,7 +36,7 @@ foreach drnum of local drlist {
 	global dr = r(n_draws)
 
 	// call simulation-based ML
-	ml model d0 sprobit_d0 (choice: $y = $X) /r, tech(nr) ///
+	ml model d0 sprobit_d0 (choice: $y = $X) /rho /lnsigma, tech(nr) ///
 	title(Spatial Probit Model, $dr Random Draws)
 	ml init b0
 	set rmsg on
