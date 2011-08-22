@@ -5,14 +5,26 @@ program define sprobit_d0
 	args func b lnf
 	
 	tempvar theta
-	tempname rho lnsig sigma
+	tempname lnsig sigma
 	mleval `theta' = `b', eq(1)
-	mleval `rho'   = `b', eq(2) scalar
-	mleval `lnsig' = `b', eq(3) scalar
+	mleval `lnsig' = `b', eq(2) scalar
 	scalar `sigma' = exp(`lnsig')
+	// get activity-specific auto-regressive coefficients
+	local num_eq = $M+2
+	forvalues i = 3/`num_eq' {
+		local ri = `i' - 2
+		tempname rho_`ri'
+		mleval `rho_`ri'' = `b', eq(`i') scalar
+	}
 
-	tempname A invA covU L sqrtU Z corrU
-	matrix `A'    = I($NM) - `rho'*W
+	tempname A R invA covU L sqrtU Z corrU
+	// define auto-regressive coefficient matrix
+	matrix `R' = I($M)
+	forvalues i = 1/$M {
+		matrix `R'[`i',`i'] = (`rho_`i'')
+	}
+	// calculate (I-R*W)^-1 and the covariance matrix
+	matrix `A'    = I($NM) - (I($N)#`R')*W
 	matrix `invA' = invsym(`A')
 	matrix `covU' = invsym((`A')'*`A')*`sigma'*`sigma'
 	// square root of the diag of the covariance matrix

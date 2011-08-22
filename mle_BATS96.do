@@ -34,7 +34,7 @@ matrix W  = Wk # I($M)
 
 ******** define household identity
 global hid sampno
-sort sampno persno
+sort sampno persno actcode
 
 /*
 	TODO extend to alternative specified parameters
@@ -43,9 +43,11 @@ sort sampno persno
 */
 // generate alternative specific constants
 local ascons " "
-foreach actv of numlist 14 15 16 { // omit activity 21 to avoid collinearity
+local asrhos " "
+foreach actv of numlist 14 15 16 21 { // omit activity 21 to avoid collinearity
 	gen _cons_`actv' = cond(`actv'==actcode, 1, 0)
 	local ascons "`ascons' _cons_`actv'"
+	local asrhos "`asrhos' /rho_`actv'"
 }
 
 ******** deifne dependent and independent variables 
@@ -81,11 +83,12 @@ foreach drnum of local drlist {
 	global dr = r(n_draws)
 
 	// call simulation-based ML
-	ml model d0 sprobit_d0 (choice: $y = $X) /rho /lnsigma, tech(nr) ///
+	ml model d0 sprobit_d0 (choice: $y = $X) /lnsigma `asrhos', tech(nr) ///
 	title(Spatial Probit Model, $dr Random Draws)
 	
 	ml init b0
 	
+	disp "run simulated maximum likelihood"
 	set rmsg on
 	ml maximize, difficult
 	set rmsg off
