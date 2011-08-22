@@ -1,13 +1,17 @@
 // import individual socio-economic data
 use ../BATS96/compPER, clear
 sort sampno
+// if with_dist == 1, then 
+// calculate the eocnomic distance based on working time span
+local with_dist 0
 
-// merge work activity
-merge 1:1 sampno persno using filtered_work
-tab _merge
-keep if _merge == 3
-drop _merge
-
+******** merge work activity
+if `with_dist' == 1 {
+	merge 1:1 sampno persno using filtered_work
+	tab _merge
+	keep if _merge == 3
+	drop _merge
+}
 ******** filter household heads
 // replace missing variables
 // replace age = . if age == 999
@@ -35,9 +39,16 @@ global N = r(r)
 // generate household working time span
 sort sampno persno
 by sampno: gen persid = _n
-forvalues j = 1/$N {
-	by sampno: gen dist_`j' = max(ending[_n], ending[`j']) - ///
-							  min(begin[_n], begin[`j'])
+if `with_dist' == 1 {
+	forvalues j = 1/$N {
+		by sampno: gen dist_`j' = max(ending[_n], ending[`j']) - ///
+								  min(begin[_n], begin[`j'])
+	}
+}
+else {
+	forvalues j = 1/$N {
+		by sampno: gen dist_`j' = 0
+	}
 }
 
 // save refined data
