@@ -7,26 +7,26 @@ program define sprobit_d0
 	tempvar theta
 	tempname lnsig sigma
 	mleval `theta' = `b', eq(1)
-	mleval `lnsig' = `b', eq(2) scalar
-	scalar `sigma' = exp(`lnsig')
 	// get activity-specific auto-regressive coefficients
-	local num_eq = $M+2
-	forvalues i = 3/`num_eq' {
-		local ri = `i' - 2
-		tempname rho_`ri'
-		mleval `rho_`ri'' = `b', eq(`i') scalar
+	forvalues i = 1/$M {
+		local i_eq = `i' + 1
+		tempname rho_`i'
+		mleval `rho_`i'' = `b', eq(`i_eq') scalar
 	}
+	// for identification purpose, we assume sigma = 1
+	scalar `sigma' = 1
 
 	tempname A R invA covU L sqrtU Z corrU
 	// define auto-regressive coefficient matrix
 	matrix `R' = I($M)
 	forvalues i = 1/$M {
-		matrix `R'[`i',`i'] = (`rho_`i'')
+		// the entries in matrix R are within the interval (0,1)
+		matrix `R'[`i',`i'] = (invlogit(`rho_`i''))
 	}
 	// calculate (I-R*W)^-1 and the covariance matrix
 	matrix `A'    = I($NM) - (I($N)#`R')*W
 	matrix `invA' = invsym(`A')
-	matrix `covU' = invsym((`A')'*`A')*`sigma'*`sigma'
+	matrix `covU' = invsym((`A')'*`A')*(`sigma'*`sigma')
 	// square root of the diag of the covariance matrix
 	matrix `sqrtU' = cholesky(diag(vecdiag(`covU')))
 	// variance-normalizing diagonal matrix
@@ -36,7 +36,7 @@ program define sprobit_d0
 	matrix `corrU' = `Z'*`covU'*`Z'
 	matrix `L'     = cholesky(`corrU')
 	/*
-		CHANGED consider i.i.d. normal distributed errors
+		CHANGED consider i.i.d. normally distributed errors
 	*/
 	// declare xb*
 	forvalues i = 1/$NM {

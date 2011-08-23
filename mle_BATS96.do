@@ -12,10 +12,10 @@ use merged_actv_pers
 log using mle_BATS96.log, replace
 
 ******** global varibles
-qui tab actcode
-global M = r(r)
 qui tab relate
 global N = r(r)
+qui tab actcode
+global M = r(r)
 global NM = $N*$M
 disp $NM
 matrix Wk = (0.0, 1.0 \ 1.0, 0.0)
@@ -42,17 +42,19 @@ sort sampno persno actcode
 		 covariance matrix of multivariate probit (not MNP)
 */
 // generate alternative specific constants
-local ascons " "
-local asrhos " "
+global ascons " "
+global aslrho " "
 foreach actv of numlist 14 15 16 21 { // omit activity 21 to avoid collinearity
 	gen _cons_`actv' = cond(`actv'==actcode, 1, 0)
-	local ascons "`ascons' _cons_`actv'"
-	local asrhos "`asrhos' /rho_`actv'"
+	global ascons "$ascons _cons_`actv'"
+	global aslrho "$aslrho /lrho_`actv'"
 }
+disp "$ascons"
+disp "$aslrho"
 
 ******** deifne dependent and independent variables 
 global y choice
-global X age i.gender i.employ `ascons'
+global X age i.gender i.employ $ascons
 /*
 	CHANGED remove i.student from independent variables
 	CHANGED and also consider significance of _cons after removal of i.student
@@ -70,6 +72,7 @@ set rmsg on
 probit $y $X
 set rmsg off
 matrix b0 = e(b)
+matrix list b0
 
 ******** estimation procedure: increase `drnum' gradually
 local drlist 2 10 20 50
@@ -83,15 +86,21 @@ foreach drnum of local drlist {
 	global dr = r(n_draws)
 
 	// call simulation-based ML
-	ml model d0 sprobit_d0 (choice: $y = $X) /lnsigma `asrhos', tech(nr) ///
+	ml model d0 sprobit_d0 (choice: $y = $X) $aslrho, tech(nr) ///
 	title(Spatial Probit Model, $dr Random Draws)
 	
 	ml init b0
+	disp "search initial values"
+	ml search
+	// disp "check likelihood function"
+	// ml check
+	ml query
 	
 	disp "run simulated maximum likelihood"
 	set rmsg on
 	ml maximize, difficult
 	set rmsg off
+	ml query
 
 	// update initial b0
 	matrix b0 = e(b)
