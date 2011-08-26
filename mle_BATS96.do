@@ -41,16 +41,21 @@ sort sampno persno actcode
 	TODO identification of alternative specified parameters and 
 		 covariance matrix of multivariate probit (not MNP)
 */
-// generate alternative specific constants
+// generate alternative specific constants and AR coefficients
 global ascons " "
-global aslrho " "
+global asrho " "
+global rhoeq " "
+local j = 0
 foreach actv of numlist 14 15 16 21 { // omit activity 21 to avoid collinearity
 	gen _cons_`actv' = cond(`actv'==actcode, 1, 0)
 	global ascons "$ascons _cons_`actv'"
-	global aslrho "$aslrho /lrho_`actv'"
+	local j = `j' + 1
+	global asrho "$asrho rho_`j'"
+	global rhoeq "$rhoeq /rho_`actv'"
 }
 disp "$ascons"
-disp "$aslrho"
+disp "$asrho"
+disp "$rhoeq"
 
 ******** deifne dependent and independent variables 
 global y choice
@@ -81,27 +86,20 @@ foreach drnum of local drlist {
 	set rmsg on
 	mdraws, dr(`drnum') neq($NM) prefix(z) burn(15) antithetics replace
 	set rmsg off
-	
 	return list
 	global dr = r(n_draws)
 
 	// call simulation-based ML
-	ml model d0 sprobit_d0 (choice: $y = $X) $aslrho, tech(nr) ///
+	ml model d0 sprobit_d0 (choice: $y = $X) $rhoeq, tech(dfp nr) ///
 	title(Spatial Probit Model, $dr Random Draws)
-	
-	ml init b0
-	disp "search initial values"
-	ml search
-	// disp "check likelihood function"
-	// ml check
-	ml query
-	
+
 	disp "run simulated maximum likelihood"
+	// set initial values
+	ml init b0
+	// start the numerical method
 	set rmsg on
 	ml maximize, difficult
 	set rmsg off
-	ml query
-
 	// update initial b0
 	matrix b0 = e(b)
 }
