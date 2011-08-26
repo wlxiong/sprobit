@@ -2,7 +2,8 @@
 version 11
 cap log close
 set more off
-set matsize 2400
+set matsize 5000
+global Wk_name Wk1
 
 ******** read data
 clear
@@ -15,15 +16,29 @@ log using mle_example_$Wk_name.log, replace
 global hid sampno
 sort sampno
 
+// generate alternative specific constants and AR coefficients
+global asrho " "
+global rhoeq " "
+local j = 0
+foreach actv of numlist 1 2 3 { // omit activity 21 to avoid collinearity
+	global ascons "$ascons _cons_`actv'"
+	local j = `j' + 1
+	global asrho "$asrho rho_`j'"
+	global rhoeq "$rhoeq /rho_`actv'"
+}
+disp "$asrho"
+disp "$rhoeq"
+
 ******** deifne dependent and independent variables 
 global y choice
 global X x1 x2
 
 ******** get initial b0 from probit
 set rmsg on
-probit $y $X
+probit $y $X, nocons
 set rmsg off
 matrix b0 = e(b)
+matrix list b0
 
 ******** estimation procedure: increase `drnum' gradually
 local drlist 2 10 20 50
@@ -36,12 +51,15 @@ foreach drnum of local drlist {
 	global dr = r(n_draws)
 
 	// call simulation-based ML
-	ml model d0 sprobit_d0 (choice: $y = $X) /rho /lnsigma, tech(nr) ///
+	ml model d0 sprobit_d0 (choice: $y = $X, nocons) $rhoeq, tech(dfp nr) ///
 	title(Spatial Probit Model, $dr Random Draws)
+	
+	disp "run simulated maximum likelihood"
 	ml init b0
 	set rmsg on
 	ml maximize, difficult
 	set rmsg off
+	ml query
 
 	// update initial b0
 	matrix b0 = e(b)

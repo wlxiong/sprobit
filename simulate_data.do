@@ -17,25 +17,27 @@ log using simulate_data.log, replace
 ******** set the simulation parameters
 
 // set number of observations in the simulation
-local gobs 200
+local gobs = 400
 disp (`gobs'*$NM)
-set obs 2400	 // `gobs'*$NM
-set matsize 2400 // `gobs'*$NM
+local nobs = `gobs'*$NM
+set obs `nobs'	 // `gobs'*$NM
+set matsize `nobs' // `gobs'*$NM
 
 // true parameters
-scalar _rho = 0.6 // 0.2
+matrix _R = ( .6,  0,  0  \  0, .9,  0  \  0,  0, .7)
+matrix _R = I($N)#_R
 scalar _b1 = 1 // two independent variables
 scalar _b2 = 2
 
 // weight matrix
-global Wk_name Wk2
+global Wk_name Wk1
 matrix Wk1 = ( 0, .5, .5, .5 \ .5,  0,  0,  0 \ .5,  0,  0,  0 \ .5,  0,  0,  0)
 matrix Wk2 = ( 0, .5,  0, .5 \ .5,  0, .5,  0 \  0, .5,  0, .5 \ .5,  0, .5,  0)
 matrix Wk3 = ( 0, .5, .5, .5 \ .5,  0, .5, .5 \ .5, .5,  0, .5 \ .5, .5, .5,  0)
 matrix W = $Wk_name # I($M)
 
 // covariance matrix
-matrix _A    = I($NM) - _rho*W
+matrix _A    = I($NM) - _R*W
 matrix _invA = invsym(_A)
 matrix _covU = invsym(_invA'*_invA)
 
