@@ -20,7 +20,7 @@ mvencode choice*, mv(0)
 reshape long
 
 // save refined data
-save filtered_actv, replace
+save dat/filtered_actv, replace
 
 ******** filter work-related activities
 restore
@@ -41,4 +41,4 @@ by sampno persno: egen ending = max(tail)
 // save refined data
 by sampno persno: keep if _n == _N
 gen span = ending - begin
-save filtered_work, replace
+save dat/filtered_work, replace

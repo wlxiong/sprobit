@@ -52,4 +52,4 @@ else {
 }
 
 // save refined data
-save filtered_pers, replace
+save dat/filtered_pers, replace

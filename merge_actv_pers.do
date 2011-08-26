@@ -1,7 +1,7 @@
 // load activity data
-use filtered_actv, clear
+use dat/filtered_actv, clear
 // merge activity data with individual's socio-economic attributes
-merge m:1 sampno persno using filtered_pers, ///
+merge m:1 sampno persno using dat/filtered_pers, ///
 	keepusing(persid relate gender age employ student license numpers has_spouse dist_*)
 tab _merge
 keep if _merge == 3
@@ -19,4 +19,4 @@ by sampno: replace numactv = numactv[_N]
 keep if numactv == 8
 drop numactv
 // save merged data
-save merged_actv_pers, replace
+save dat/merged_actv_pers, replace

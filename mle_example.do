@@ -8,9 +8,9 @@ global Wk_name Wk1
 ******** read data
 clear
 cd ~/Workspace/Stata/sprobit
-use simulated_data_$Wk_name
+use dat/simulated_data_$Wk_name
 // turn on log
-log using mle_example_$Wk_name.log, replace
+log using log/mle_example_$Wk_name.log, replace
 
 ******** define household identity
 global hid sampno
