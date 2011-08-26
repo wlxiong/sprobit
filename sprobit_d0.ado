@@ -5,13 +5,13 @@ program define sprobit_d0
 	args func b lnf
 	
 	tempvar theta
-	tempname lnsig sigma
+	tempname $asrho sigma
 	mleval `theta' = `b', eq(1)
 	// get activity-specific auto-regressive coefficients
+	local j = 1
 	forvalues i = 1/$M {
-		local i_eq = `i' + 1
-		tempname rho_`i'
-		mleval `rho_`i'' = `b', eq(`i_eq') scalar
+		local j = `j' + 1
+		mleval `rho_`i'' = `b', eq(`j') scalar
 	}
 	// for identification purpose, we assume sigma = 1
 	scalar `sigma' = 1
@@ -21,7 +21,7 @@ program define sprobit_d0
 	matrix `R' = I($M)
 	forvalues i = 1/$M {
 		// the entries in matrix R are within the interval (0,1)
-		matrix `R'[`i',`i'] = (invlogit(`rho_`i''))
+		matrix `R'[`i',`i'] = (`rho_`i'')
 	}
 	// calculate (I-R*W)^-1 and the covariance matrix
 	matrix `A'    = I($NM) - (I($N)#`R')*W
@@ -62,7 +62,7 @@ program define sprobit_d0
 		capture drop axb*
 		svmat `AXB', name(axb)
 		tempvar last fi
-		by $hid: gen byte `last' = (_n==$NM)
+		by $hid: gen double `last' = (_n==$NM)
 		egen `fi'   = mvnp(axb*), chol(`L') dr($dr) prefix(z) signs(k*)
 		mlsum `lnf' = ln(`fi') if `last'
 	}
