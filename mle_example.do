@@ -51,16 +51,16 @@ foreach drnum of local drlist {
 	global dr = r(n_draws)
 
 	// call simulation-based ML
-	ml model d0 sprobit_d0 (choice: $y = $X, nocons) $rhoeq, tech(dfp nr) ///
+	ml model d0 sprobit_d0 (choice: $y = $X, nocons) $rhoeq, tech(nr 4 dfp 8) ///
 	title(Spatial Probit Model, $dr Random Draws)
-	
+
 	disp "run simulated maximum likelihood"
+	// set initial values
 	ml init b0
+	// start the numerical method
 	set rmsg on
 	ml maximize, difficult
 	set rmsg off
-	ml query
-
 	// update initial b0
 	matrix b0 = e(b)
 }

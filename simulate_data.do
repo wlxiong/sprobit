@@ -24,7 +24,7 @@ set obs `nobs'	 // `gobs'*$NM
 set matsize `nobs' // `gobs'*$NM
 
 // true parameters
-matrix _R = ( .6,  0,  0  \  0, .9,  0  \  0,  0, .7)
+matrix _R = ( .5,  0,  0  \  0, -.9,  0  \  0,  0, -.4)
 matrix _R = I($N)#_R
 scalar _b1 = 1 // two independent variables
 scalar _b2 = 2
