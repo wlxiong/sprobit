@@ -6,7 +6,7 @@ clear
 
 ******** global variables
 global M = 3 // number of choice alternatives for each individual
-global N = 4 // number of individuals in each household
+global N = 2 // number of individuals in each household
 global NM = $N*$M // number of observations in each household
 
 // turn on log
@@ -24,14 +24,20 @@ set obs `nobs'	 // `gobs'*$NM
 set matsize `nobs' // `gobs'*$NM
 
 // true parameters
-matrix _R = ( .5,  0,  0  \  0, -.9,  0  \  0,  0, -.4)
+matrix _R = ( .7,  0,  0  \  0, -.5,  0  \  0,  0, 0.05)
 matrix _R = I($N)#_R
-scalar _b1 = 1 // two independent variables
-scalar _b2 = 2
+scalar _b1 = -0.05
+scalar _b2 = 0.3
+scalar _b3 = 0.2
+scalar _b4 = -0.1
+scalar _cons1 = 5.0
+scalar _cons2 = 2.0
+scalar _cons3 = 6.0
 
 // weight matrix
 global Wk_name Wk1
-matrix Wk1 = ( 0, .5, .5, .5 \ .5,  0,  0,  0 \ .5,  0,  0,  0 \ .5,  0,  0,  0)
+matrix Wk1 = ( 0, 1 \ 1,  0)
+// matrix Wk1 = ( 0, .5, .5, .5 \ .5,  0,  0,  0 \ .5,  0,  0,  0 \ .5,  0,  0,  0)
 matrix Wk2 = ( 0, .5,  0, .5 \ .5,  0, .5,  0 \  0, .5,  0, .5 \ .5,  0, .5,  0)
 matrix Wk3 = ( 0, .5, .5, .5 \ .5,  0, .5, .5 \ .5, .5,  0, .5 \ .5, .5, .5,  0)
 matrix W = $Wk_name # I($M)
@@ -44,6 +50,14 @@ matrix _covU = invsym(_invA'*_invA)
 // generate household identity
 gen sampno = int((_n-1)/$NM)+1
 sort sampno
+
+// generate person identity
+by sampno: gen persno = int((_n-1)/$M)+1
+sort sampno persno
+
+// generate activity code
+by sampno persno: gen actcode = _n
+sort sampno persno actcode
 
 ******** generate correlated random errors
 local randutils " "
@@ -61,9 +75,18 @@ forvalues j = 1/$NM{
 }
 
 ******** generate latent utility
-gen x1 = 5*runiform() - 2
-gen x2 = 3*runiform() - 2
-gen _xb = _b1*x1 + _b2*x2
+// generate socioeconomic attibutes
+gen age    = 48*runiform() + 12
+gen gender = cond(persno==1, 1, 0)
+gen employ = runiform() > 0.1
+// generate travel time
+gen ttime = 55*runiform() + 5
+sum age gender employ ttime
+// calculate latent utility
+gen _xb = _b1*age + _b2*gender + _b3*employ + _b4*ttime
+forvalues k = 1/$M {
+	by sampno persno: replace _xb = _xb + _cons`k' if _n == `k'
+}
 forvalues i = 1/$NM {
 	by sampno: gen _xb`i' = _xb[`i']
 }
@@ -85,6 +108,8 @@ forvalues j = 1/$NM{
 
 ******** generate observed choices
 gen choice = utils > 0
+tab actcode choice
+tab gender choice
 tab choice
 
 // save simulated data
