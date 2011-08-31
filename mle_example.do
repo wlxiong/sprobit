@@ -17,21 +17,24 @@ global hid sampno
 sort sampno
 
 // generate alternative specific constants and AR coefficients
+global ascons " "
 global asrho " "
 global rhoeq " "
 local j = 0
 foreach actv of numlist 1 2 3 { // omit activity 21 to avoid collinearity
+	gen _cons_`actv' = cond(`actv'==actcode, 1, 0)
 	global ascons "$ascons _cons_`actv'"
 	local j = `j' + 1
 	global asrho "$asrho rho_`j'"
 	global rhoeq "$rhoeq /rho_`actv'"
 }
+disp "$ascons"
 disp "$asrho"
 disp "$rhoeq"
 
 ******** deifne dependent and independent variables 
 global y choice
-global X x1 x2
+global X age gender employ ttime $ascons
 
 ******** get initial b0 from probit
 set rmsg on
