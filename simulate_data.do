@@ -79,6 +79,9 @@ forvalues j = 1/$NM{
 gen age    = 48*runiform() + 12
 gen gender = cond(persno==1, 1, 0)
 gen employ = runiform() > 0.1
+by sampno persno: replace age    = age[1]
+by sampno persno: replace gender = gender[1]
+by sampno persno: replace employ = employ[1]
 // generate travel time
 gen ttime = 55*runiform() + 5
 sum age gender employ ttime
