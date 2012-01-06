@@ -43,6 +43,7 @@ set rmsg off
 matrix b0 = e(b)
 matrix list b0
 
+// set trace on
 ******** estimation procedure: increase `drnum' gradually
 local drlist 2 10 20 50
 foreach drnum of local drlist {
@@ -67,6 +68,7 @@ foreach drnum of local drlist {
 	// update initial b0
 	matrix b0 = e(b)
 }
+// set trace off
 
 // turn off log
 log off

@@ -74,7 +74,7 @@ global X age i.gender i.employ $ascons
 
 ******** get initial b0 from probit
 set rmsg on
-probit $y $X, noncons
+probit $y $X, nocons
 set rmsg off
 matrix b0 = e(b)
 matrix list b0
@@ -90,7 +90,7 @@ foreach drnum of local drlist {
 	global dr = r(n_draws)
 
 	// call simulation-based ML
-	ml model d0 sprobit_d0 (choice: $y = $X, noncons) $rhoeq, tech(nr 4 dfp 8) ///
+	ml model d0 sprobit_d0 (choice: $y = $X, nocons) $rhoeq, tech(nr 4 dfp 8) ///
 	title(Spatial Probit Model, $dr Random Draws)
 
 	disp "run simulated maximum likelihood"
