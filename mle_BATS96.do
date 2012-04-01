@@ -6,7 +6,6 @@ set matsize 6000
 
 ******** read data
 clear
-cd ~/Workspace/Stata/sprobit
 use dat/merged_actv_pers
 // turn on log
 log using log/mle_BATS96.log, replace

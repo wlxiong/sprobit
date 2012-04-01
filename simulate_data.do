@@ -11,7 +11,6 @@ global NM = $N*$M // number of observations in each household
 
 // turn on log
 clear
-cd ~/Workspace/Stata/sprobit
 log using log/simulate_data.log, replace
 
 ******** set the simulation parameters

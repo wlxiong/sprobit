@@ -7,7 +7,6 @@ global Wk_name Wk1
 
 ******** read data
 clear
-cd ~/Workspace/Stata/sprobit
 use dat/simulated_data_$Wk_name
 // turn on log
 log using log/mle_example_$Wk_name.log, replace
